@@ -93,11 +93,11 @@ class SliderViewModel(
 }
 
 interface SomeController {
-    fun setValue(value: Int)
+    suspend fun setValue(value: Int)
 }
 
 class SomeControllerImpl : SomeController {
-    override fun setValue(value: Int) {
+    override suspend fun setValue(value: Int) {
         logi("setValue($value)")
     }
 }

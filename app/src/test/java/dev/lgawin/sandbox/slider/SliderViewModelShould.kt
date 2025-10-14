@@ -5,12 +5,12 @@ import dev.lgawin.testing.MainDispatcherExtension
 import io.mockk.CapturingSlot
 import io.mockk.Runs
 import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
-import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,7 +29,7 @@ class SliderViewModelShould {
     fun setUp() {
         slot = slot<Int>()
         controller = mockk<SomeController> {
-            every { setValue(capture(slot)) } just Runs
+            coEvery { setValue(capture(slot)) } just Runs
         }
         viewModel = SliderViewModel(controller = controller)
         // clear initial setValue(0) (?)
@@ -45,7 +45,7 @@ class SliderViewModelShould {
     fun `send value to controller`() {
         viewModel.update(SliderValue.Dragging(3f))
 
-        verify { controller.setValue(any()) }
+        coVerify { controller.setValue(any()) }
         assertThat(slot.captured).isEqualTo(3)
     }
 
@@ -58,7 +58,7 @@ class SliderViewModelShould {
     fun `send integer value to controller with proper rounding`(value: Float, expected: Int) {
         viewModel.update(SliderValue.Dragging(value))
 
-        verify { controller.setValue(expected) }
+        coVerify { controller.setValue(expected) }
     }
 
     @Test
@@ -69,11 +69,7 @@ class SliderViewModelShould {
         viewModel.update(SliderValue.Dragging(1.8f))
         viewModel.update(SliderValue.Dragging(2.1f))
 
-        verify(exactly = 1) {
-            controller.setValue(1)
-        }
-        verify(exactly = 1) {
-            controller.setValue(2)
-        }
+        coVerify(exactly = 1) { controller.setValue(1) }
+        coVerify(exactly = 1) { controller.setValue(2) }
     }
 }
