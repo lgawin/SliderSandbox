@@ -13,7 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,7 +40,9 @@ class MainActivity : ComponentActivity() {
                             name = "Android",
                             modifier = Modifier.padding(innerPadding),
                         )
-                        var sliderValue: SliderValue by remember { mutableStateOf(SliderValue.Settled(0f)) }
+                        var sliderValue: SliderValue by rememberSaveable(stateSaver = SliderValueSaver) {
+                            mutableStateOf(SliderValue.Settled(0f))
+                        }
                         val value by sliderValue
                         Text("Value: $sliderValue")
                         Slider(
@@ -46,7 +50,9 @@ class MainActivity : ComponentActivity() {
                             onValueChange = { sliderValue = SliderValue.Dragging(it) },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             valueRange = 0f..42f,
-                            onValueChangeFinished = { sliderValue = SliderValue.Settled(value) },
+                            onValueChangeFinished = {
+                                sliderValue = SliderValue.Settled(value)
+                            },
                         )
                     }
                 }
@@ -60,12 +66,18 @@ sealed interface SliderValue {
 
     @JvmInline
     value class Dragging(override val value: Float) : SliderValue
+
     @JvmInline
     value class Settled(override val value: Float) : SliderValue
 }
 
 @Suppress("NOTHING_TO_INLINE")
 inline operator fun SliderValue.getValue(thisObj: Any?, property: KProperty<*>): Float = value
+
+val SliderValueSaver = object : Saver<SliderValue, Float> {
+    override fun restore(value: Float): SliderValue = SliderValue.Settled(value)
+    override fun SaverScope.save(value: SliderValue): Float = value.value
+}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
