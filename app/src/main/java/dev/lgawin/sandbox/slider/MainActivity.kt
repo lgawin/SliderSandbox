@@ -21,10 +21,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import dev.lgawin.sandbox.slider.ui.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.reflect.KProperty
 
 class MainActivity : ComponentActivity() {
@@ -68,12 +71,31 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-class SliderViewModel : ViewModel() {
+class SliderViewModel(
+    private val controller: SomeController = SomeControllerImpl(),
+) : ViewModel() {
     private val mutableValue = MutableStateFlow(0f)
     val value = mutableValue.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            value.map { it.toInt() }
+                .collect(controller::setValue)
+        }
+    }
+
     fun update(sliderValue: SliderValue) {
         mutableValue.update { sliderValue.value }
+    }
+}
+
+interface SomeController {
+    fun setValue(value: Int)
+}
+
+class SomeControllerImpl : SomeController {
+    override fun setValue(value: Int) {
+        logi("setValue($value)")
     }
 }
 
