@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlin.reflect.KProperty
 
 class MainActivity : ComponentActivity() {
@@ -79,7 +80,7 @@ class SliderViewModel(
 
     init {
         viewModelScope.launch {
-            value.map { it.toInt() }
+            value.map { it.roundToInt() }
                 .collect(controller::setValue)
         }
     }
