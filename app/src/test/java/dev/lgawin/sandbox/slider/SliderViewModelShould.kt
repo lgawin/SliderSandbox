@@ -11,6 +11,7 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -31,6 +32,13 @@ class SliderViewModelShould {
             every { setValue(capture(slot)) } just Runs
         }
         viewModel = SliderViewModel(controller = controller)
+        // clear initial setValue(0) (?)
+        clearMocks(controller, answers = false)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        confirmVerified(controller)
     }
 
     @Test
@@ -49,16 +57,17 @@ class SliderViewModelShould {
     )
     fun `send integer value to controller with proper rounding`(value: Float, expected: Int) {
         viewModel.update(SliderValue.Dragging(value))
-        assertThat(slot.captured).isEqualTo(expected)
+
+        verify { controller.setValue(expected) }
     }
 
     @Test
     fun `not call controller if value is not changed`() {
-        clearMocks(controller, answers = false)
-
         viewModel.update(SliderValue.Dragging(1.3f))
         viewModel.update(SliderValue.Dragging(1.4f))
         viewModel.update(SliderValue.Dragging(1.6f))
+        viewModel.update(SliderValue.Dragging(1.8f))
+        viewModel.update(SliderValue.Dragging(2.1f))
 
         verify(exactly = 1) {
             controller.setValue(1)
@@ -66,6 +75,5 @@ class SliderViewModelShould {
         verify(exactly = 1) {
             controller.setValue(2)
         }
-        confirmVerified(controller)
     }
 }
