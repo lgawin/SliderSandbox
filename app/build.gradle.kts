@@ -39,6 +39,12 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+            it.jvmArgs("-XX:+EnableDynamicAgentLoading")
+        }
+    }
 }
 
 dependencies {
@@ -50,7 +56,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    testImplementation(libs.junit)
+    implementation(platform(libs.kotlinx.coroutines.bom))
+    implementation(libs.kotlinx.coroutines.android)
+    testImplementation(platform(libs.test.junit.bom))
+    testImplementation(libs.test.junit.jupiter)
+    testRuntimeOnly(libs.test.junit.platform.launcher)
+    testImplementation(libs.test.mockk)
+    testImplementation(libs.test.truth)
+    testImplementation(libs.test.kotlinx.coroutines)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
