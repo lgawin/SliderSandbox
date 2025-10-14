@@ -11,6 +11,8 @@ import io.mockk.confirmVerified
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -71,5 +73,24 @@ class SliderViewModelShould {
 
         coVerify(exactly = 1) { controller.setValue(1) }
         coVerify(exactly = 1) { controller.setValue(2) }
+    }
+
+    @Test
+    fun `handle backpressure`() = runTest {
+        val rendezvousChannel = Channel<Int>(Channel.RENDEZVOUS)
+
+        coEvery { controller.setValue(any()) } coAnswers { rendezvousChannel.send(1) }
+        viewModel.update(SliderValue.Dragging(1f))
+        viewModel.update(SliderValue.Dragging(2f))
+        viewModel.update(SliderValue.Dragging(3f))
+        viewModel.update(SliderValue.Dragging(4f))
+        rendezvousChannel.receive()
+        viewModel.update(SliderValue.Dragging(5f))
+        viewModel.update(SliderValue.Dragging(6f))
+        rendezvousChannel.receive()
+
+        coVerify(exactly = 1) { controller.setValue(1) }
+        coVerify(exactly = 1) { controller.setValue(4) }
+        coVerify(exactly = 1) { controller.setValue(6) }
     }
 }
