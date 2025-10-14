@@ -1,9 +1,11 @@
 package dev.lgawin.sandbox.slider
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,18 +14,22 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.lgawin.sandbox.slider.ui.theme.AppTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlin.reflect.KProperty
 
 class MainActivity : ComponentActivity() {
+
+    private val viewModel by viewModels<SliderViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,24 +46,34 @@ class MainActivity : ComponentActivity() {
                             name = "Android",
                             modifier = Modifier.padding(innerPadding),
                         )
-                        var sliderValue: SliderValue by rememberSaveable(stateSaver = SliderValueSaver) {
-                            mutableStateOf(SliderValue.Settled(0f))
-                        }
-                        val value by sliderValue
+                        val sliderValue by viewModel.value.collectAsStateWithLifecycle()
                         Text("Value: $sliderValue")
                         Slider(
-                            value = value,
-                            onValueChange = { sliderValue = SliderValue.Dragging(it) },
+                            value = sliderValue,
+                            onValueChange = {
+                                logd("slider.onValueChange($it)")
+                                viewModel.update(SliderValue.Dragging(it))
+                            },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             valueRange = 0f..42f,
                             onValueChangeFinished = {
-                                sliderValue = SliderValue.Settled(value)
+                                logd("slider.onValueChangeFinished()")
+                                viewModel.update(SliderValue.Settled(sliderValue))
                             },
                         )
                     }
                 }
             }
         }
+    }
+}
+
+class SliderViewModel : ViewModel() {
+    private val mutableValue = MutableStateFlow(0f)
+    val value = mutableValue.asStateFlow()
+
+    fun update(sliderValue: SliderValue) {
+        mutableValue.update { sliderValue.value }
     }
 }
 
@@ -77,6 +93,18 @@ inline operator fun SliderValue.getValue(thisObj: Any?, property: KProperty<*>):
 val SliderValueSaver = object : Saver<SliderValue, Float> {
     override fun restore(value: Float): SliderValue = SliderValue.Settled(value)
     override fun SaverScope.save(value: SliderValue): Float = value.value
+}
+
+private fun logv(message: String) {
+    Log.v("gawluk", message)
+}
+
+private fun logd(message: String) {
+    Log.d("gawluk", message)
+}
+
+private fun logi(message: String) {
+    Log.i("gawluk", message)
 }
 
 @Composable
