@@ -23,7 +23,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dev.lgawin.sandbox.slider.ui.theme.AppTheme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -85,6 +87,11 @@ class SliderViewModel(
                 .distinctUntilChanged()
                 .collect(controller::setValue)
         }
+        viewModelScope.launch {
+            controller.value.collect {
+                mutableValue.value = it.toFloat()
+            }
+        }
     }
 
     fun update(sliderValue: SliderValue) {
@@ -93,12 +100,18 @@ class SliderViewModel(
 }
 
 interface SomeController {
+    val value: Flow<Int>
     suspend fun setValue(value: Int)
 }
 
 class SomeControllerImpl : SomeController {
+
+    val mutableValue = MutableStateFlow(0)
+    override val value: StateFlow<Int> = mutableValue.asStateFlow()
+
     override suspend fun setValue(value: Int) {
         logi("setValue($value)")
+        mutableValue.update { value }
     }
 }
 
@@ -128,7 +141,7 @@ private fun logd(message: String) {
     Log.d("gawluk", message)
 }
 
-private fun logi(message: String) {
+fun logi(message: String) {
     Log.i("gawluk", message)
 }
 
