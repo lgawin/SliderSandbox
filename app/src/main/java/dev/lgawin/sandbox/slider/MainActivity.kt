@@ -25,6 +25,7 @@ import androidx.lifecycle.viewModelScope
 import dev.lgawin.sandbox.slider.ui.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -81,6 +82,7 @@ class SliderViewModel(
     init {
         viewModelScope.launch {
             value.map { it.roundToInt() }
+                .distinctUntilChanged()
                 .collect(controller::setValue)
         }
     }

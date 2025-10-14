@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import dev.lgawin.testing.MainDispatcherExtension
 import io.mockk.CapturingSlot
 import io.mockk.Runs
+import io.mockk.clearMocks
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -48,5 +50,22 @@ class SliderViewModelShould {
     fun `send integer value to controller with proper rounding`(value: Float, expected: Int) {
         viewModel.update(SliderValue.Dragging(value))
         assertThat(slot.captured).isEqualTo(expected)
+    }
+
+    @Test
+    fun `not call controller if value is not changed`() {
+        clearMocks(controller, answers = false)
+
+        viewModel.update(SliderValue.Dragging(1.3f))
+        viewModel.update(SliderValue.Dragging(1.4f))
+        viewModel.update(SliderValue.Dragging(1.6f))
+
+        verify(exactly = 1) {
+            controller.setValue(1)
+        }
+        verify(exactly = 1) {
+            controller.setValue(2)
+        }
+        confirmVerified(controller)
     }
 }
