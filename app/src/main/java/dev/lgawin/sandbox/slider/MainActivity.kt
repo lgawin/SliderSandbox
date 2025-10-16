@@ -48,6 +48,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import dev.gawluk.car.sandbox.CarSpecificUi
 import dev.gawluk.car.sandbox.installCarFeature
 import dev.lgawin.sandbox.slider.ui.theme.AppTheme
 import dev.lgawin.utils.isAutomotive
@@ -85,6 +86,9 @@ class MainActivity : ComponentActivity() {
                             name = "Android",
                             modifier = Modifier.padding(innerPadding),
                         )
+                        if (isAutomotive) {
+                            CarSpecificUi()
+                        }
                         var sliderValue by remember(viewModelValue) {
                             mutableFloatStateOf(
                                 viewModelValue
