@@ -14,8 +14,11 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -47,22 +50,28 @@ class MainActivity : ComponentActivity() {
                             .fillMaxSize()
                             .padding(all = 24.dp),
                     ) {
+                        val viewModelValue by viewModel.value.collectAsStateWithLifecycle()
                         Greeting(
                             name = "Android",
                             modifier = Modifier.padding(innerPadding),
                         )
-                        val sliderValue by viewModel.value.collectAsStateWithLifecycle()
+                        var sliderValue by remember(viewModelValue) {
+                            mutableFloatStateOf(
+                                viewModelValue
+                            )
+                        }
                         Text("Value: $sliderValue")
                         Slider(
                             value = sliderValue,
                             onValueChange = {
+                                sliderValue = it
                                 logd("slider.onValueChange($it)")
                                 viewModel.update(SliderValue.Dragging(it))
                             },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             valueRange = 0f..42f,
                             onValueChangeFinished = {
-                                logd("slider.onValueChangeFinished()")
+                                logd("slider.onValueChangeFinished($sliderValue)")
                                 viewModel.update(SliderValue.Settled(sliderValue))
                             },
                         )
