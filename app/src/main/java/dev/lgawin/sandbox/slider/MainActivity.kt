@@ -48,7 +48,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import dev.gawluk.car.sandbox.installCarFeature
 import dev.lgawin.sandbox.slider.ui.theme.AppTheme
+import dev.lgawin.utils.isAutomotive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -65,6 +67,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        if (isAutomotive) {
+            installCarFeature()
+        }
+
         setContent {
             AppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -244,6 +251,10 @@ private fun logd(message: String) {
 
 private fun logi(message: String) {
     Log.i("gawluk", message)
+}
+
+private fun logw(t: Throwable) {
+    Log.w("gawluk", t)
 }
 
 @Composable

@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(platform(libs.kotlinx.coroutines.bom))
     implementation(libs.kotlinx.coroutines.android)
+    implementation(project(":car-features"))
     testImplementation(platform(libs.test.junit.bom))
     testImplementation(libs.test.junit.jupiter)
     testRuntimeOnly(libs.test.junit.platform.launcher)

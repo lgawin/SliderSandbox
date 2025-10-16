@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Slider Sandbox"
 include(":app")
+include(":car-toolkit", ":car-features")
