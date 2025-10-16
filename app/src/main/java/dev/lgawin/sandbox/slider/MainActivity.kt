@@ -48,6 +48,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import dev.lgawin.sandbox.RingtoneSandbox
 import dev.lgawin.sandbox.slider.ui.theme.AppTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -78,6 +79,7 @@ class MainActivity : ComponentActivity() {
                             name = "Android",
                             modifier = Modifier.padding(innerPadding),
                         )
+                        RingtoneSandbox()
                         var sliderValue by remember(viewModelValue) {
                             mutableFloatStateOf(
                                 viewModelValue
