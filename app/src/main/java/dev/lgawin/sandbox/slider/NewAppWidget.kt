@@ -2,7 +2,10 @@ package dev.lgawin.sandbox.slider
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.Intent.ACTION_LOCALE_CHANGED
 import android.util.Log
 import android.widget.RemoteViews
 
@@ -10,6 +13,25 @@ import android.widget.RemoteViews
  * Implementation of App Widget functionality.
  */
 class NewAppWidget : AppWidgetProvider() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        Log.d("gawluk", "onReceive: $intent")
+        super.onReceive(context, intent)
+        val appWidgetManager: AppWidgetManager = AppWidgetManager.getInstance(context) ?: return
+
+        val provider = ComponentName(context, javaClass)
+        val widgetIds: IntArray = appWidgetManager.getAppWidgetIds(provider)
+
+        val action: String? = intent.action
+        when (action) {
+            ACTION_LOCALE_CHANGED -> {
+                for (appWidgetId in widgetIds) {
+                    updateAppWidget(context, appWidgetManager, appWidgetId)
+                }
+            }
+        }
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
